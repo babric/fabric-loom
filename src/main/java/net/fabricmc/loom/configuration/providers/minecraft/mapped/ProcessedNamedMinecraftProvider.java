@@ -34,6 +34,7 @@ import java.util.List;
 import net.fabricmc.loom.LoomGradleExtension;
 import net.fabricmc.loom.LoomGradlePlugin;
 import net.fabricmc.loom.configuration.processors.JarProcessorManager;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MergedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets;
@@ -190,6 +191,17 @@ public abstract class ProcessedNamedMinecraftProvider<M extends MinecraftProvide
 		@Override
 		public String env() {
 			return env;
+		}
+	}
+
+	public static final class GluedImpl extends ProcessedNamedMinecraftProvider<GluedMinecraftProvider, NamedMinecraftProvider.GluedImpl> implements Merged {
+		public GluedImpl(NamedMinecraftProvider.GluedImpl parentMinecraftProvide, JarProcessorManager jarProcessorManager) {
+			super(parentMinecraftProvide, jarProcessorManager);
+		}
+
+		@Override
+		public Path getMergedJar() {
+			return getProcessedPath(getParentMinecraftProvider().getMergedJar());
 		}
 	}
 }

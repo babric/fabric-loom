@@ -132,7 +132,7 @@ public abstract class AbstractMappedMinecraftProvider<M extends MinecraftProvide
 		Files.deleteIfExists(remappedJars.outputJar());
 
 		final Map<String, String> remappedSignatures = SignatureFixerApplyVisitor.getRemappedSignatures(getTargetNamespace() == MappingsNamespace.INTERMEDIARY, mappingsProvider, project, toM);
-		TinyRemapper remapper = TinyRemapperHelper.getTinyRemapper(project, fromM, toM, true, (builder) -> {
+		TinyRemapper remapper = TinyRemapperHelper.getTinyRemapper(project, fromM, toM, remappedJars.sourceNamespace() == MappingsNamespace.INTERMEDIARY, (builder) -> {
 			builder.extraPostApplyVisitor(new SignatureFixerApplyVisitor(remappedSignatures));
 			configureRemapper(remappedJars, builder);
 		});

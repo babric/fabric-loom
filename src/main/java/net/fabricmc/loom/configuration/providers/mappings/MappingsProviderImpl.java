@@ -41,6 +41,9 @@ import java.util.function.Supplier;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonObject;
+
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
+
 import org.apache.tools.ant.util.StringUtils;
 import org.gradle.api.Project;
 import org.jetbrains.annotations.Nullable;
@@ -193,7 +196,9 @@ public class MappingsProviderImpl implements MappingsProvider, SharedService {
 			// These are unmerged v2 mappings
 			MappingsMerger.mergeAndSaveMappings(baseTinyMappings, tinyMappings, intermediaryService.get());
 		} else {
-			if (minecraftProvider instanceof MergedMinecraftProvider mergedMinecraftProvider) {
+			if (minecraftProvider instanceof GluedMinecraftProvider) {
+				Files.move(baseTinyMappings, tinyMappings);
+			} else if (minecraftProvider instanceof MergedMinecraftProvider mergedMinecraftProvider) {
 				// These are merged v1 mappings
 				Files.deleteIfExists(tinyMappings);
 				LOGGER.info(":populating field names");

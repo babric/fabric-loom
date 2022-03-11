@@ -115,6 +115,10 @@ public final class TinyRemapperHelper {
 
 			for (MappingTree.ClassMapping classDef : mappings.getClasses()) {
 				String className = classDef.getName(fromId);
+				if (className == null) {
+					className = classDef.getSrcName();
+				}
+
 				String dstName = classDef.getName(toId);
 
 				if (dstName == null) {

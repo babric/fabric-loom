@@ -104,7 +104,8 @@ public interface LoomGradleExtension extends LoomGradleExtensionAPI {
 		return switch (mappingsNamespace) {
 		case NAMED -> getNamedMinecraftProvider().getMinecraftJars();
 		case INTERMEDIARY -> getIntermediaryMinecraftProvider().getMinecraftJars();
-		case OFFICIAL -> getMinecraftProvider().getMinecraftJars();
+		case OFFICIAL, GLUE -> getMinecraftProvider().getMinecraftJars();
+		case SERVER, CLIENT -> null;
 		};
 	}
 

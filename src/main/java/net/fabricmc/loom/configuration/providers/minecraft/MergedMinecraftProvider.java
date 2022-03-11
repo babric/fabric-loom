@@ -36,7 +36,7 @@ import org.gradle.api.Project;
 import net.fabricmc.loom.util.HashedDownloadUtil;
 import net.fabricmc.stitch.merge.JarMerger;
 
-public final class MergedMinecraftProvider extends MinecraftProvider {
+public class MergedMinecraftProvider extends MinecraftProvider {
 	private Path minecraftMergedJar;
 
 	public MergedMinecraftProvider(Project project) {
@@ -58,13 +58,22 @@ public final class MergedMinecraftProvider extends MinecraftProvider {
 	public void provide() throws Exception {
 		super.provide();
 
-		if (!getVersionInfo().isVersionOrNewer("2012-07-25T22:00:00+00:00" /* 1.3 release date */)) {
+		if (!(this instanceof GluedMinecraftProvider) && !getVersionInfo().isVersionOrNewer("2012-07-25T22:00:00+00:00" /* 1.3 release date */)) {
 			throw new UnsupportedOperationException("Minecraft versions 1.2.5 and older cannot be merged. Please use `loom { server/clientOnlyMinecraftJar() }`");
 		}
 
 		if (!Files.exists(minecraftMergedJar) || isRefreshDeps()) {
 			try {
-				mergeJars();
+				File serverJar = getMinecraftServerJar();
+
+				if (getServerBundleMetadata() != null) {
+					extractBundledServerJar();
+					serverJar = getMinecraftExtractedServerJar();
+				}
+
+				Objects.requireNonNull(serverJar, "Cannot merge null input jar?");
+
+				mergeJars(getMinecraftClientJar(), serverJar);
 			} catch (Throwable e) {
 				HashedDownloadUtil.delete(getMinecraftClientJar());
 				HashedDownloadUtil.delete(getMinecraftServerJar());
@@ -76,19 +85,10 @@ public final class MergedMinecraftProvider extends MinecraftProvider {
 		}
 	}
 
-	private void mergeJars() throws IOException {
+	protected void mergeJars(File clientJar, File serverJar) throws IOException {
 		getLogger().info(":merging jars");
 
-		File jarToMerge = getMinecraftServerJar();
-
-		if (getServerBundleMetadata() != null) {
-			extractBundledServerJar();
-			jarToMerge = getMinecraftExtractedServerJar();
-		}
-
-		Objects.requireNonNull(jarToMerge, "Cannot merge null input jar?");
-
-		try (JarMerger jarMerger = new JarMerger(getMinecraftClientJar(), jarToMerge, minecraftMergedJar.toFile())) {
+		try (JarMerger jarMerger = new JarMerger(clientJar, serverJar, minecraftMergedJar.toFile())) {
 			jarMerger.enableSyntheticParamsOffset();
 			jarMerger.merge();
 		}

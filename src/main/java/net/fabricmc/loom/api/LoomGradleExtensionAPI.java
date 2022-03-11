@@ -180,5 +180,9 @@ public interface LoomGradleExtensionAPI {
 	@ApiStatus.Experimental
 	boolean areEnvironmentSourceSetsSplit();
 
+	default void gluedMinecraftJar() {
+		getMinecraftJarConfiguration().set(MinecraftJarConfiguration.GLUED);
+	}
+
 	Property<Boolean> getRuntimeOnlyLog4j();
 }
