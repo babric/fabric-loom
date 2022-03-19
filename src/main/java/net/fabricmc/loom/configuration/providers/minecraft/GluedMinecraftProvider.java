@@ -13,26 +13,23 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
+import org.apache.commons.io.FilenameUtils;
+import org.gradle.api.Project;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
+import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
+import net.fabricmc.loom.util.TinyRemapperHelper;
 import net.fabricmc.stitch.representation.JarClassEntry;
 import net.fabricmc.stitch.representation.JarReader;
 import net.fabricmc.stitch.representation.JarRootEntry;
-
 import net.fabricmc.stitch.util.StitchUtil;
-
-import org.apache.commons.io.FilenameUtils;
-import org.gradle.api.Project;
-
-import net.fabricmc.loom.util.TinyRemapperHelper;
+import net.fabricmc.tinyremapper.IMappingProvider;
 import net.fabricmc.tinyremapper.NonClassCopyMode;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyUtils;
-
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.ClassNode;
 
 public final class GluedMinecraftProvider extends MergedMinecraftProvider {
 	private File minecraftClientGlueJar;
@@ -51,7 +48,7 @@ public final class GluedMinecraftProvider extends MergedMinecraftProvider {
 
 	@Override
 	protected void mergeJars(File clientJar, File serverJar) throws IOException {
-		var mappings = getExtension().getMappingsProvider().tinyMappings;
+		Path mappings = getExtension().getMappingsProvider().tinyMappings;
 
 		if (!minecraftClientGlueJar.exists()) {
 			getLogger().lifecycle(":Gluing client");
@@ -71,7 +68,7 @@ public final class GluedMinecraftProvider extends MergedMinecraftProvider {
 	private void remapJar(Path input, Path output, Path mappingsPath, MappingsNamespace fromM, MappingsNamespace toM) {
 		getLogger().lifecycle(":Remapping minecraft (TinyRemapper, " + fromM + " -> " + toM + ')');
 
-		var mappings = TinyUtils.createTinyMappingProvider(mappingsPath, fromM.toString(), toM.toString());
+		IMappingProvider mappings = TinyUtils.createTinyMappingProvider(mappingsPath, fromM.toString(), toM.toString());
 
 		TinyRemapper remapper = TinyRemapper.newRemapper()
 				.withMappings(mappings)
@@ -98,6 +95,7 @@ public final class GluedMinecraftProvider extends MergedMinecraftProvider {
 		JarReader.Builder.create(jarEntry).joinMethodEntries(false).build().apply();
 
 		long nests = jarEntry.getClasses().stream().filter(entry -> !entry.getInnerClasses().isEmpty()).count();
+
 		if (nests > 0) {
 			System.out.println("Found " + nests + " nested classes to check");
 
@@ -113,6 +111,7 @@ public final class GluedMinecraftProvider extends MergedMinecraftProvider {
 					if (entry.isDirectory()) continue; //No need to copy these over
 
 					Path outPath = newFS.get().getPath(entry.getName());
+
 					if (outPath.getParent() != null && Files.notExists(outPath.getParent())) {
 						Files.createDirectories(outPath.getParent());
 					}
@@ -147,8 +146,9 @@ public final class GluedMinecraftProvider extends MergedMinecraftProvider {
 								missingInners.add(clazz);
 							}
 
-							if (clazz.isAnonymous()) {//Anonymous classes mark parent classes by the outerClass attribute rather than the innerClass
+							if (clazz.isAnonymous()) { //Anonymous classes mark parent classes by the outerClass attribute rather than the innerClass
 								String outer = getParent(clazz.getFullyQualifiedName());
+
 								if (!outer.equals(node.outerClass)) {
 									missingOuter = outer;
 								}

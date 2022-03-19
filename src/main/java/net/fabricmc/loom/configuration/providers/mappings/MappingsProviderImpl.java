@@ -41,9 +41,6 @@ import java.util.function.Supplier;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonObject;
-
-import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
-
 import org.apache.tools.ant.util.StringUtils;
 import org.gradle.api.Project;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +52,7 @@ import net.fabricmc.loom.LoomGradlePlugin;
 import net.fabricmc.loom.configuration.DependencyInfo;
 import net.fabricmc.loom.configuration.providers.mappings.tiny.MappingsMerger;
 import net.fabricmc.loom.configuration.providers.mappings.tiny.TinyJarInfo;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MergedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.util.Constants;

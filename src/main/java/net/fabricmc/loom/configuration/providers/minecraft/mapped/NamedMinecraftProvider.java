@@ -27,11 +27,10 @@ package net.fabricmc.loom.configuration.providers.minecraft.mapped;
 import java.nio.file.Path;
 import java.util.List;
 
-import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
-
 import org.gradle.api.Project;
 
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MergedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.SingleJarMinecraftProvider;
@@ -117,7 +116,7 @@ public abstract class NamedMinecraftProvider<M extends MinecraftProvider> extend
 		@Override
 		public List<RemappedJars> getRemappedJars() {
 			return List.of(
-				new RemappedJars(minecraftProvider.getMinecraftEnvOnlyJar(), getEnvOnlyJar(), MappingsNamespace.OFFICIAL)
+					new RemappedJars(minecraftProvider.getMinecraftEnvOnlyJar(), getEnvOnlyJar(), MappingsNamespace.OFFICIAL)
 			);
 		}
 

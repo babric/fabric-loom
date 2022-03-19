@@ -60,7 +60,7 @@ public final class MappingsMerger {
 			Tiny2Reader.read(reader, intermediaryTree);
 		}
 
-		var sourceNs = intermediaryTree.getDstNamespaces().contains(MappingsNamespace.GLUE.toString()) ? MappingsNamespace.GLUE.toString() : MappingsNamespace.OFFICIAL.toString();
+		String sourceNs = intermediaryTree.getDstNamespaces().contains(MappingsNamespace.GLUE.toString()) ? MappingsNamespace.GLUE.toString() : MappingsNamespace.OFFICIAL.toString();
 
 		MemoryMappingTree officialTree = new MemoryMappingTree();
 		MappingNsCompleter nsCompleter = new MappingNsCompleter(officialTree, Map.of(sourceNs, MappingsNamespace.INTERMEDIARY.toString()));
