@@ -33,6 +33,7 @@ import java.util.Objects;
 
 import org.gradle.api.Project;
 
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.mods.dependency.LocalMavenHelper;
 import net.fabricmc.loom.configuration.processors.MinecraftJarProcessorManager;
 import net.fabricmc.loom.configuration.processors.ProcessorContextImpl;
@@ -209,6 +210,17 @@ public abstract class ProcessedNamedMinecraftProvider<M extends MinecraftProvide
 		@Override
 		public SingleJarEnvType env() {
 			return env;
+		}
+	}
+
+	public static final class GluedImpl extends ProcessedNamedMinecraftProvider<GluedMinecraftProvider, NamedMinecraftProvider.GluedImpl> implements Merged {
+		public GluedImpl(NamedMinecraftProvider.GluedImpl parentMinecraftProvide, MinecraftJarProcessorManager jarProcessorManager) {
+			super(parentMinecraftProvide, jarProcessorManager);
+		}
+
+		@Override
+		public MinecraftJar getMergedJar() {
+			return getProcessedJar(getParentMinecraftProvider().getMergedJar());
 		}
 	}
 }

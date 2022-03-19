@@ -27,6 +27,7 @@ package net.fabricmc.loom.configuration.providers.minecraft.mapped;
 import java.util.List;
 
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.ConfigContext;
 import net.fabricmc.loom.configuration.providers.minecraft.MergedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
@@ -126,6 +127,24 @@ public abstract class NamedMinecraftProvider<M extends MinecraftProvider> extend
 		@Override
 		public SingleJarEnvType env() {
 			return env;
+		}
+	}
+
+	public static final class GluedImpl extends NamedMinecraftProvider<GluedMinecraftProvider> implements Merged {
+		public GluedImpl(ConfigContext configContext, GluedMinecraftProvider minecraftProvider) {
+			super(configContext, minecraftProvider);
+		}
+
+		@Override
+		public List<RemappedJars> getRemappedJars() {
+			return List.of(
+				new RemappedJars(minecraftProvider.getMergedJar(), getMergedJar(), MappingsNamespace.GLUE)
+			);
+		}
+
+		@Override
+		public List<String> getDependencyTargets() {
+			return List.of(MERGED);
 		}
 	}
 }

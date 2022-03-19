@@ -34,10 +34,11 @@ import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.SingleJarEnvType;
 import net.fabricmc.loom.configuration.providers.minecraft.SingleJarMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.SplitMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.util.SidedClassVisitor;
 import net.fabricmc.tinyremapper.TinyRemapper;
 
-public abstract sealed class IntermediaryMinecraftProvider<M extends MinecraftProvider> extends AbstractMappedMinecraftProvider<M> permits IntermediaryMinecraftProvider.MergedImpl, IntermediaryMinecraftProvider.SingleJarImpl, IntermediaryMinecraftProvider.SplitImpl {
+public abstract sealed class IntermediaryMinecraftProvider<M extends MinecraftProvider> extends AbstractMappedMinecraftProvider<M> permits IntermediaryMinecraftProvider.GluedImpl, IntermediaryMinecraftProvider.MergedImpl, IntermediaryMinecraftProvider.SingleJarImpl, IntermediaryMinecraftProvider.SplitImpl {
 	public IntermediaryMinecraftProvider(ConfigContext configContext, M minecraftProvider) {
 		super(configContext, minecraftProvider);
 	}
@@ -116,6 +117,19 @@ public abstract sealed class IntermediaryMinecraftProvider<M extends MinecraftPr
 		@Override
 		public SingleJarEnvType env() {
 			return env;
+		}
+	}
+
+	public static final class GluedImpl extends IntermediaryMinecraftProvider<GluedMinecraftProvider> implements Merged {
+		public GluedImpl(ConfigContext configContext, GluedMinecraftProvider minecraftProvider) {
+			super(configContext, minecraftProvider);
+		}
+
+		@Override
+		public List<RemappedJars> getRemappedJars() {
+			return List.of(
+				new RemappedJars(minecraftProvider.getMergedJar(), getMergedJar(), MappingsNamespace.GLUE)
+			);
 		}
 	}
 }

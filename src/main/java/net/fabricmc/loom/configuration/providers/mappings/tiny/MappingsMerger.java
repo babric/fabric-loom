@@ -60,9 +60,11 @@ public final class MappingsMerger {
 			Tiny2Reader.read(reader, intermediaryTree);
 		}
 
+		String sourceNs = intermediaryTree.getDstNamespaces().contains(MappingsNamespace.GLUE.toString()) ? MappingsNamespace.GLUE.toString() : MappingsNamespace.OFFICIAL.toString();
+
 		MemoryMappingTree officialTree = new MemoryMappingTree();
-		MappingNsCompleter nsCompleter = new MappingNsCompleter(officialTree, Map.of(MappingsNamespace.OFFICIAL.toString(), MappingsNamespace.INTERMEDIARY.toString()));
-		MappingSourceNsSwitch nsSwitch = new MappingSourceNsSwitch(nsCompleter, MappingsNamespace.OFFICIAL.toString());
+		MappingNsCompleter nsCompleter = new MappingNsCompleter(officialTree, Map.of(sourceNs, MappingsNamespace.INTERMEDIARY.toString()));
+		MappingSourceNsSwitch nsSwitch = new MappingSourceNsSwitch(nsCompleter, sourceNs);
 		intermediaryTree.accept(nsSwitch);
 
 		inheritMappedNamesOfEnclosingClasses(officialTree);

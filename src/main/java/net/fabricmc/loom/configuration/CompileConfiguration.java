@@ -191,12 +191,14 @@ public final class CompileConfiguration {
 		// Provide the vanilla mc jars -- TODO share across projects.
 		final MinecraftProvider minecraftProvider = jarConfiguration.getMinecraftProviderFunction().apply(configContext);
 		extension.setMinecraftProvider(minecraftProvider);
-		minecraftProvider.provide();
+		minecraftProvider.init();
 
 		final DependencyInfo mappingsDep = DependencyInfo.create(project, Constants.Configurations.MAPPINGS);
 		final MappingConfiguration mappingConfiguration = MappingConfiguration.create(project, configContext.serviceManager(), mappingsDep, minecraftProvider);
 		extension.setMappingConfiguration(mappingConfiguration);
 		mappingConfiguration.applyToProject(project, mappingsDep);
+
+		minecraftProvider.provide();
 
 		// Provide the remapped mc jars
 		final IntermediaryMinecraftProvider<?> intermediaryMinecraftProvider = jarConfiguration.getIntermediaryMinecraftProviderBiFunction().apply(configContext, minecraftProvider);

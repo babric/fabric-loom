@@ -72,6 +72,13 @@ public abstract class MinecraftProvider {
 		this.project = configContext.project();
 	}
 
+	public void init() {
+		final DependencyInfo dependency = DependencyInfo.create(getProject(), Constants.Configurations.MINECRAFT);
+		minecraftVersion = dependency.getDependency().getVersion();
+
+		initFiles();
+	}
+
 	protected boolean provideClient() {
 		return true;
 	}
@@ -81,9 +88,6 @@ public abstract class MinecraftProvider {
 	}
 
 	public void provide() throws Exception {
-		final DependencyInfo dependency = DependencyInfo.create(getProject(), Constants.Configurations.MINECRAFT);
-		minecraftVersion = dependency.getDependency().getVersion();
-
 		initFiles();
 
 		downloadMcJson();

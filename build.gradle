@@ -23,7 +23,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 	}
 }
 
-group = 'net.fabricmc'
+group = 'babric'
 archivesBaseName = project.name
 def baseVersion = '1.1'
 
@@ -40,6 +40,10 @@ repositories {
 		url = 'https://maven.fabricmc.net/'
 	}
 	mavenCentral()
+	maven {
+		name = 'Babric'
+		url = 'https://maven.glass-launcher.net/babric'
+	}
 }
 
 configurations {
@@ -74,7 +78,7 @@ dependencies {
 	implementation ('org.ow2.asm:asm-util:9.4')
 
 	// game handling utils
-	implementation ('net.fabricmc:stitch:0.6.2') {
+	implementation ('babric:stitch:0.6.2-babric.1') {
 		exclude module: 'enigma'
 	}
 
@@ -83,7 +87,7 @@ dependencies {
 	implementation 'net.fabricmc:access-widener:2.1.0'
 	implementation 'net.fabricmc:mapping-io:0.2.1'
 
-	implementation ('net.fabricmc:lorenz-tiny:4.0.2') {
+	implementation('babric:lorenz-tiny:4.0.2') {
 		transitive = false
 	}
 
@@ -171,7 +175,7 @@ codenarc {
 gradlePlugin {
 	plugins {
 		fabricLoom {
-			id = 'fabric-loom'
+			id = project.name
 			implementationClass = 'net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap'
 		}
 	}
@@ -227,8 +231,8 @@ publishing {
 
 		// Manually crate the plugin marker for snapshot versions
 		snapshotPlugin(MavenPublication) { publication ->
-			groupId 'fabric-loom'
-			artifactId 'fabric-loom.gradle.plugin'
+			groupId 'babric-loom'
+			artifactId 'babric-loom.gradle.plugin'
 			version baseVersion + '-SNAPSHOT'
 
 			pom.withXml({
@@ -238,9 +242,9 @@ publishing {
 				Node dependencies = root.appendChild(document.createElement('dependencies'))
 				Node dependency = dependencies.appendChild(document.createElement('dependency'))
 				Node groupId = dependency.appendChild(document.createElement('groupId'))
-				groupId.setTextContent('net.fabricmc')
+				groupId.setTextContent('babric')
 				Node artifactId = dependency.appendChild(document.createElement('artifactId'))
-				artifactId.setTextContent('fabric-loom')
+				artifactId.setTextContent('babric-loom')
 				Node version = dependency.appendChild(document.createElement('version'))
 				version.setTextContent(baseVersion + '-SNAPSHOT')
 			})

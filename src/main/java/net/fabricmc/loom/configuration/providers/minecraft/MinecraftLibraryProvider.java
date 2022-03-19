@@ -126,6 +126,11 @@ public class MinecraftLibraryProvider {
 					continue;
 				}
 
+				if (name.startsWith("net.minecraft:launchwrapper")) {
+					// Don't include launchwrapper in dev env
+					continue;
+				}
+
 				if (runtimeOnlyLog4j && name.startsWith("org.apache.logging.log4j")) {
 					// Make log4j a runtime only dep to force slf4j.
 					addDependency(Constants.Configurations.MINECRAFT_RUNTIME_DEPENDENCIES, name);
