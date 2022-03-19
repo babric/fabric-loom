@@ -47,8 +47,8 @@ repositories {
 	mavenCentral()
 	mavenLocal()
 	maven {
-		name = 'Jitpack'
-		url = 'https://jitpack.io'
+		name = 'Babric'
+		url = 'https://maven.glass-launcher.net/babric'
 	}
 }
 
@@ -89,11 +89,11 @@ dependencies {
 	}
 
 	// tinyfile management
-	implementation('com.github.js6pak:tiny-remapper:c389241')
+	implementation('babric:tiny-remapper:0.8.1')
 	implementation 'net.fabricmc:access-widener:2.1.0'
 	implementation 'net.fabricmc:mapping-io:0.2.1'
 
-	implementation('com.github.calmilamsy:lorenz-tiny:2d844f1') {
+	implementation('babric:lorenz-tiny:4.0.2') {
 		transitive = false
 	}
 
