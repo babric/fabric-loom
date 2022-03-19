@@ -71,6 +71,14 @@ public enum MinecraftJarConfiguration {
 		ProcessedNamedMinecraftProvider.SplitImpl::new,
 		SplitDecompileConfiguration::new,
 		List.of("client", "server")
+	),
+	GLUED(
+		GluedMinecraftProvider::new,
+		IntermediaryMinecraftProvider.GluedImpl::new,
+		NamedMinecraftProvider.GluedImpl::new,
+		ProcessedNamedMinecraftProvider.GluedImpl::new,
+		SingleJarDecompileConfiguration::new,
+		List.of("client", "server")
 	);
 
 	private final Function<Project, MinecraftProvider> minecraftProviderFunction;

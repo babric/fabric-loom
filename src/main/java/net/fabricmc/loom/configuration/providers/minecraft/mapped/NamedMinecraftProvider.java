@@ -30,6 +30,7 @@ import java.util.List;
 import org.gradle.api.Project;
 
 import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MergedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.SingleJarMinecraftProvider;
@@ -115,7 +116,7 @@ public abstract class NamedMinecraftProvider<M extends MinecraftProvider> extend
 		@Override
 		public List<RemappedJars> getRemappedJars() {
 			return List.of(
-				new RemappedJars(minecraftProvider.getMinecraftEnvOnlyJar(), getEnvOnlyJar(), MappingsNamespace.OFFICIAL)
+					new RemappedJars(minecraftProvider.getMinecraftEnvOnlyJar(), getEnvOnlyJar(), MappingsNamespace.OFFICIAL)
 			);
 		}
 
@@ -127,6 +128,24 @@ public abstract class NamedMinecraftProvider<M extends MinecraftProvider> extend
 		@Override
 		public String env() {
 			return env;
+		}
+	}
+
+	public static final class GluedImpl extends NamedMinecraftProvider<GluedMinecraftProvider> implements Merged {
+		public GluedImpl(Project project, GluedMinecraftProvider minecraftProvider) {
+			super(project, minecraftProvider);
+		}
+
+		@Override
+		public List<RemappedJars> getRemappedJars() {
+			return List.of(
+					new RemappedJars(minecraftProvider.getMergedJar(), getMergedJar(), MappingsNamespace.GLUE)
+			);
+		}
+
+		@Override
+		public List<String> getDependencyTargets() {
+			return List.of(MERGED);
 		}
 	}
 }

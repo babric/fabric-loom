@@ -28,7 +28,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 	}
 }
 
-group = 'net.fabricmc'
+group = 'babric'
 archivesBaseName = project.name
 def baseVersion = '1.0'
 
@@ -45,6 +45,10 @@ repositories {
 		url = 'https://maven.fabricmc.net/'
 	}
 	mavenCentral()
+	maven {
+		name = 'Babric'
+		url = 'https://maven.glass-launcher.net/babric'
+	}
 }
 
 configurations {
@@ -89,7 +93,7 @@ dependencies {
 	implementation 'net.fabricmc:access-widener:2.1.0'
 	implementation 'net.fabricmc:mapping-io:0.2.1'
 
-	implementation ('net.fabricmc:lorenz-tiny:4.0.2') {
+	implementation('babric:lorenz-tiny:4.0.2') {
 		transitive = false
 	}
 
@@ -171,7 +175,7 @@ codenarc {
 gradlePlugin {
 	plugins {
 		fabricLoom {
-			id = 'fabric-loom'
+			id = project.name
 			implementationClass = 'net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap'
 		}
 	}
@@ -208,14 +212,6 @@ import org.w3c.dom.Node
 
 publishing {
 	publications {
-		plugin(MavenPublication) { publication ->
-			groupId project.group
-			artifactId project.archivesBaseName
-			version project.version
-
-			from components.java
-		}
-
 		// Also publish a snapshot so people can use the latest version if they wish
 		snapshot(MavenPublication) { publication ->
 			groupId project.group

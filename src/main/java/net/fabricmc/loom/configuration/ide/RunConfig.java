@@ -117,6 +117,7 @@ public class RunConfig {
 		runConfig.mainClass = "net.fabricmc.devlaunchinjector.Main";
 		runConfig.vmArgs.add("-Dfabric.dli.config=" + encodeEscaped(extension.getFiles().getDevLauncherConfig().getAbsolutePath()));
 		runConfig.vmArgs.add("-Dfabric.dli.env=" + environment.toLowerCase());
+		runConfig.vmArgs.add("-Djava.library.path=" + extension.getFiles().getNativesDirectory(project).getAbsolutePath());
 	}
 
 	// Turns camelCase/PascalCase into Capital Case

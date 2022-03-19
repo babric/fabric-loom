@@ -53,6 +53,7 @@ import net.fabricmc.loom.LoomGradlePlugin;
 import net.fabricmc.loom.configuration.DependencyInfo;
 import net.fabricmc.loom.configuration.providers.mappings.tiny.MappingsMerger;
 import net.fabricmc.loom.configuration.providers.mappings.tiny.TinyJarInfo;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.util.Constants;
 import net.fabricmc.loom.util.DeletingFileVisitor;
@@ -193,6 +194,8 @@ public class MappingsProviderImpl implements MappingsProvider, SharedService {
 		if (areMappingsV2(baseTinyMappings)) {
 			// These are unmerged v2 mappings
 			MappingsMerger.mergeAndSaveMappings(baseTinyMappings, tinyMappings, intermediaryService.get());
+		} else if (minecraftProvider instanceof GluedMinecraftProvider) {
+			Files.move(baseTinyMappings, tinyMappings);
 		} else {
 			final List<Path> minecraftJars = minecraftProvider.getMinecraftJars();
 
