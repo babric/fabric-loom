@@ -170,7 +170,7 @@ codenarc {
 gradlePlugin {
 	plugins {
 		fabricLoom {
-			id = 'fabric-loom'
+			id = project.name
 			implementationClass = 'net.fabricmc.loom.bootstrap.LoomGradlePluginBootstrap'
 		}
 	}
@@ -221,8 +221,8 @@ publishing {
 
 		// Manually crate the plugin marker for snapshot versions
 		snapshotPlugin(MavenPublication) { publication ->
-			groupId 'fabric-loom'
-			artifactId 'fabric-loom.gradle.plugin'
+			groupId project.name
+			artifactId project.name + '.gradle.plugin'
 			version baseVersion + '-SNAPSHOT'
 
 			pom.withXml({
@@ -232,9 +232,9 @@ publishing {
 				Node dependencies = root.appendChild(document.createElement('dependencies'))
 				Node dependency = dependencies.appendChild(document.createElement('dependency'))
 				Node groupId = dependency.appendChild(document.createElement('groupId'))
-				groupId.setTextContent('net.fabricmc')
+				groupId.setTextContent(project.group)
 				Node artifactId = dependency.appendChild(document.createElement('artifactId'))
-				artifactId.setTextContent('fabric-loom')
+				artifactId.setTextContent(project.name)
 				Node version = dependency.appendChild(document.createElement('version'))
 				version.setTextContent(baseVersion + '-SNAPSHOT')
 			})
