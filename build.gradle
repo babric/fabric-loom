@@ -28,7 +28,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 	}
 }
 
-group = 'net.fabricmc'
+group = 'babric'
 archivesBaseName = project.name
 def baseVersion = '0.12'
 
