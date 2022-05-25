@@ -69,6 +69,9 @@ public class MinecraftLibraryProvider {
 				} else if (library.name().startsWith("org.ow2.asm:asm-all")) {
 					// Don't want asm-all, use the modern split version.
 					continue;
+				} else if (library.name().startsWith("net.minecraft:launchwrapper")) {
+					// Don't include launchwrapper in dev env
+					continue;
 				}
 
 				if (runtimeOnlyLog4j && library.name().startsWith("org.apache.logging.log4j")) {
