@@ -25,6 +25,7 @@
 package net.fabricmc.loom.configuration.providers.minecraft;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,7 +67,32 @@ public record MinecraftVersionMeta(
 		}
 	}
 
-	public record Library(Downloads downloads, String name, Map<String, String> natives, List<Rule> rules, Object extract) {
+	public record Library(Downloads downloads, String name, String url, Map<String, String> natives, List<Rule> rules,
+						  Object extract) {
+		public Library(Downloads downloads, String name, String url, Map<String, String> natives, List<Rule> rules, Object extract) {
+			this.name = name;
+			this.url = url;
+			this.natives = natives;
+			this.rules = rules;
+			this.extract = extract;
+
+			if (downloads == null && url != null) {
+				if (hasNatives()) {
+					Map<String, Download> classifiers = new HashMap<>();
+
+					for (String classifier : natives.values()) {
+						classifiers.put(classifier, Download.fromMaven(url, name, classifier));
+					}
+
+					this.downloads = new Downloads(null, classifiers);
+				} else {
+					this.downloads = new Downloads(Download.fromMaven(url, name, null), null);
+				}
+			} else {
+				this.downloads = downloads;
+			}
+		}
+
 		public boolean isValidForOS() {
 			if (rules == null) {
 				// No rules allow everything.
@@ -141,7 +167,21 @@ public record MinecraftVersionMeta(
 		}
 	}
 
-	public record Download(String path, String sha1, long size, String url) {
+	public record Download(String url, String path, String sha1, Long size) {
+		public static Download fromMaven(String mavenUrl, String name, String classifier) {
+			String path = getPath(name, classifier);
+			return new Download(mavenUrl + path, path, null, null);
+		}
+
+		private static String getPath(String fullName, String classifier) {
+			String[] split = fullName.split(":");
+			String group = split[0];
+			String name = split[1];
+			String version = split[2];
+
+			return String.format("%s/%s/%s/%s-%s%s.jar", group.replace('.', '/'), name, version, name, version, classifier == null ? "" : "-" + classifier);
+		}
+
 		public File relativeFile(File baseDirectory) {
 			Objects.requireNonNull(path(), "Cannot get relative file from a null path");
 			return new File(baseDirectory, path());
