@@ -68,7 +68,7 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 		this.invokerTasks = invokerTasks;
 	}
 
-	protected static Collection<Configuration> getApConfigurations(Project project, Function<String, String> getApConfigNameFunc) {
+	protected static Collection<Configuration> getApConfigurations(Project project, Function<SourceSet, String> getApConfigNameFunc) {
 		MixinExtension mixin = LoomGradleExtension.get(project).getMixin();
 		return mixin.getApConfigurationsStream(getApConfigNameFunc).collect(Collectors.toList());
 	}
@@ -89,7 +89,7 @@ public abstract class AnnotationProcessorInvoker<T extends Task> {
 					put(Constants.MixinArguments.IN_MAP_FILE_NAMED_INTERMEDIARY, loom.getMappingsProvider().tinyMappings.toFile().getCanonicalPath());
 					put(Constants.MixinArguments.OUT_MAP_FILE_NAMED_INTERMEDIARY, MixinMappingsService.getMixinMappingFile(project, sourceSet).getCanonicalPath());
 					put(Constants.MixinArguments.OUT_REFMAP_FILE, getRefmapDestination(task, refmapName));
-					put(Constants.MixinArguments.DEFAULT_OBFUSCATION_ENV, "named:intermediary");
+					put(Constants.MixinArguments.DEFAULT_OBFUSCATION_ENV, "named:" + loom.getMixin().getRefmapTargetNamespace().get());
 					put(Constants.MixinArguments.QUIET, "true");
 				}};
 

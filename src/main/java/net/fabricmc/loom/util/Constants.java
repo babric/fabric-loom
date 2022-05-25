@@ -69,6 +69,9 @@ public class Constants {
 		public static final String MINECRAFT_SERVER_DEPENDENCIES = "minecraftServerLibraries";
 		public static final String MINECRAFT_DEPENDENCIES = "minecraftLibraries";
 		public static final String MINECRAFT_RUNTIME_DEPENDENCIES = "minecraftRuntimeOnlyLibraries";
+		/**
+		 * Not used on Minecraft 1.19-pre1 or later. Natives are all loaded from the classpath.
+		 */
 		public static final String MINECRAFT_NATIVES = "minecraftNatives";
 		public static final String MAPPINGS = "mappings";
 		public static final String MAPPINGS_FINAL = "mappingsFinal";
@@ -105,7 +108,7 @@ public class Constants {
 		 * Constants for versions of dependencies.
 		 */
 		public static final class Versions {
-			public static final String MIXIN_COMPILE_EXTENSIONS = "0.4.7";
+			public static final String MIXIN_COMPILE_EXTENSIONS = "0.5.0";
 			public static final String DEV_LAUNCH_INJECTOR = "0.2.1+build.8";
 			public static final String TERMINAL_CONSOLE_APPENDER = "1.2.0";
 			public static final String JETBRAINS_ANNOTATIONS = "23.0.0";
@@ -141,5 +144,10 @@ public class Constants {
 
 		private TaskGroup() {
 		}
+	}
+
+	public static final class CustomModJsonKeys {
+		public static final String INJECTED_INTERFACE = "loom:injected_interfaces";
+		public static final String PROVIDED_JAVADOC = "loom:provided_javadoc";
 	}
 }

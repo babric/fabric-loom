@@ -70,9 +70,7 @@ public interface LoomGradleExtensionAPI {
 
 	ConfigurableFileCollection getLog4jConfigs();
 
-	default Dependency officialMojangMappings() {
-		return layered(LayeredMappingSpecBuilder::officialMojangMappings);
-	}
+	Dependency officialMojangMappings();
 
 	Dependency layered(Action<LayeredMappingSpecBuilder> action);
 
@@ -83,6 +81,16 @@ public interface LoomGradleExtensionAPI {
 	NamedDomainObjectContainer<RunConfigSettings> getRunConfigs();
 
 	void mixin(Action<MixinExtensionAPI> action);
+
+	/**
+	 * Optionally register and configure a {@link ModSettings} object. The name should match the modid.
+	 * This is generally only required when the mod spans across multiple classpath directories, such as when using split sourcesets.
+	 */
+	@ApiStatus.Experimental
+	void mods(Action<NamedDomainObjectContainer<ModSettings>> action);
+
+	@ApiStatus.Experimental
+	NamedDomainObjectContainer<ModSettings> getMods();
 
 	@ApiStatus.Experimental
 	// TODO: move this from LoomGradleExtensionAPI to LoomGradleExtension once getRefmapName & setRefmapName is removed.
@@ -131,6 +139,13 @@ public interface LoomGradleExtensionAPI {
 	 * @return the property controlling the transitive access wideners
 	 */
 	Property<Boolean> getEnableTransitiveAccessWideners();
+
+	/**
+	 * When true loom will apply mod provided javadoc from dependencies.
+	 *
+	 * @return the property controlling the mod provided javadoc
+	 */
+	Property<Boolean> getEnableModProvidedJavadoc();
 
 	@ApiStatus.Experimental
 	IntermediateMappingsProvider getIntermediateMappingsProvider();

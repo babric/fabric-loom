@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import net.fabricmc.loom.util.Architecture;
 import net.fabricmc.loom.util.OperatingSystem;
 
 @SuppressWarnings("unused")
@@ -55,6 +56,10 @@ public record MinecraftVersionMeta(
 		return this.releaseTime().compareTo(releaseTime) >= 0;
 	}
 
+	public boolean hasNativesToExtract() {
+		return libraries.stream().anyMatch(Library::hasNatives);
+	}
+
 	public record AssetIndex(String id, long totalSize, String path, String sha1, long size, String url) {
 		public String fabricId(String version) {
 			return id.equals(version) ? version : version + "-" + id;
@@ -63,17 +68,20 @@ public record MinecraftVersionMeta(
 
 	public record Library(Downloads downloads, String name, Map<String, String> natives, List<Rule> rules, Object extract) {
 		public boolean isValidForOS() {
-			if (rules == null || rules.isEmpty()) {
+			if (rules == null) {
+				// No rules allow everything.
 				return true;
 			}
 
-			for (Rule rule : rules) {
-				if (rule.appliesToOS() && !rule.isAllowed()) {
-					return false;
+			boolean valid = false;
+
+			for (Rule rule : this.rules) {
+				if (rule.appliesToOS()) {
+					valid = rule.isAllowed();
 				}
 			}
 
-			return true;
+			return valid;
 		}
 
 		public boolean hasNatives() {
@@ -85,7 +93,7 @@ public record MinecraftVersionMeta(
 				return false;
 			}
 
-			if (natives.get(OperatingSystem.CURRENT_OS) == null) {
+			if (classifierForOS() == null) {
 				return false;
 			}
 
@@ -93,7 +101,13 @@ public record MinecraftVersionMeta(
 		}
 
 		public Download classifierForOS() {
-			return downloads().classifier(natives.get(OperatingSystem.CURRENT_OS));
+			String classifier = natives.get(OperatingSystem.CURRENT_OS);
+
+			if (Architecture.CURRENT.isArm()) {
+				classifier += "-arm64";
+			}
+
+			return downloads().classifier(classifier);
 		}
 
 		public Download artifact() {

@@ -39,6 +39,7 @@ import org.gradle.api.tasks.SourceSet;
 import net.fabricmc.loom.api.InterfaceInjectionExtensionAPI;
 import net.fabricmc.loom.api.LoomGradleExtensionAPI;
 import net.fabricmc.loom.api.MixinExtensionAPI;
+import net.fabricmc.loom.api.ModSettings;
 import net.fabricmc.loom.api.decompilers.DecompilerOptions;
 import net.fabricmc.loom.api.mappings.intermediate.IntermediateMappingsProvider;
 import net.fabricmc.loom.api.mappings.layered.spec.LayeredMappingSpecBuilder;
@@ -66,6 +67,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	protected final Property<String> customManifest;
 	protected final Property<Boolean> setupRemappedVariants;
 	protected final Property<Boolean> transitiveAccessWideners;
+	protected final Property<Boolean> modProvidedJavadoc;
 	protected final Property<String> intermediary;
 	protected final Property<IntermediateMappingsProvider> intermediateMappingsProvider;
 	private final Property<Boolean> runtimeOnlyLog4j;
@@ -77,6 +79,10 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 
 	private final NamedDomainObjectContainer<RunConfigSettings> runConfigs;
 	private final NamedDomainObjectContainer<DecompilerOptions> decompilers;
+	private final NamedDomainObjectContainer<ModSettings> mods;
+
+	// A common mistake with layered mappings is to call the wrong `officialMojangMappings` method, use this to keep track of when we are building a layered mapping spec.
+	protected final ThreadLocal<Boolean> layeredSpecBuilderScope = ThreadLocal.withInitial(() -> false);
 
 	protected LoomGradleExtensionApiImpl(Project project, LoomFiles directories) {
 		this.jarProcessors = project.getObjects().listProperty(JarProcessor.class)
@@ -93,6 +99,9 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.transitiveAccessWideners = project.getObjects().property(Boolean.class)
 				.convention(true);
 		this.transitiveAccessWideners.finalizeValueOnRead();
+		this.modProvidedJavadoc = project.getObjects().property(Boolean.class)
+				.convention(true);
+		this.modProvidedJavadoc.finalizeValueOnRead();
 		this.intermediary = project.getObjects().property(String.class)
 				.convention("https://maven.fabricmc.net/net/fabricmc/intermediary/%1$s/intermediary-%1$s-v2.jar");
 
@@ -106,6 +115,7 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 		this.runConfigs = project.container(RunConfigSettings.class,
 				baseName -> new RunConfigSettings(project, baseName));
 		this.decompilers = project.getObjects().domainObjectContainer(DecompilerOptions.class);
+		this.mods = project.getObjects().domainObjectContainer(ModSettings.class);
 
 		this.minecraftJarConfiguration = project.getObjects().property(MinecraftJarConfiguration.class).convention(MinecraftJarConfiguration.MERGED);
 		this.minecraftJarConfiguration.finalizeValueOnRead();
@@ -163,9 +173,22 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	}
 
 	@Override
+	public Dependency officialMojangMappings() {
+		if (layeredSpecBuilderScope.get()) {
+			throw new IllegalStateException("Use `officialMojangMappings()` when configuring layered mappings, not the extension method `loom.officialMojangMappings()`");
+		}
+
+		return layered(LayeredMappingSpecBuilder::officialMojangMappings);
+	}
+
+	@Override
 	public Dependency layered(Action<LayeredMappingSpecBuilder> action) {
 		LayeredMappingSpecBuilderImpl builder = new LayeredMappingSpecBuilderImpl();
+
+		layeredSpecBuilderScope.set(true);
 		action.execute(builder);
+		layeredSpecBuilderScope.set(false);
+
 		LayeredMappingSpec builtSpec = builder.build();
 		return new LayeredMappingsDependency(getProject(), new GradleMappingContext(getProject(), builtSpec.getVersion().replace("+", "_").replace(".", "_")), builtSpec, builtSpec.getVersion());
 	}
@@ -213,6 +236,11 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	@Override
 	public Property<Boolean> getEnableTransitiveAccessWideners() {
 		return transitiveAccessWideners;
+	}
+
+	@Override
+	public Property<Boolean> getEnableModProvidedJavadoc() {
+		return modProvidedJavadoc;
 	}
 
 	protected abstract Project getProject();
@@ -280,6 +308,16 @@ public abstract class LoomGradleExtensionApiImpl implements LoomGradleExtensionA
 	@Override
 	public InterfaceInjectionExtensionAPI getInterfaceInjection() {
 		return interfaceInjectionExtension;
+	}
+
+	@Override
+	public void mods(Action<NamedDomainObjectContainer<ModSettings>> action) {
+		action.execute(getMods());
+	}
+
+	@Override
+	public NamedDomainObjectContainer<ModSettings> getMods() {
+		return mods;
 	}
 
 	// This is here to ensure that LoomGradleExtensionApiImpl compiles without any unimplemented methods

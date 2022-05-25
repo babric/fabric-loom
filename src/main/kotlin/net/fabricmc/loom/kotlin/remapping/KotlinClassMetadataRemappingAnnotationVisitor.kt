@@ -30,9 +30,12 @@ import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.tree.AnnotationNode
+import org.slf4j.LoggerFactory
 
-class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapper, val next: AnnotationVisitor) :
+class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapper, val next: AnnotationVisitor, val className: String?) :
     AnnotationNode(Opcodes.ASM9, KotlinMetadataRemappingClassVisitor.ANNOTATION_DESCRIPTOR) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private var _name: String? = null
 
@@ -43,12 +46,24 @@ class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapp
 
     override fun visitEnd() {
         super.visitEnd()
-        when (val metadata = readMetadata()) {
+
+        val header = readHeader() ?: return
+
+        val headerVersion = KotlinVersion(header.metadataVersion[0], header.metadataVersion[1], 0)
+        val currentMinorVersion = KotlinVersion(KotlinVersion.CURRENT.major, KotlinVersion.CURRENT.minor, 0)
+
+        if (headerVersion != currentMinorVersion) {
+            logger.info("Kotlin metadata for class ($className) as it was built using a different major Kotlin version (${header.metadataVersion[0]}.${header.metadataVersion[1]}.x) while the remapper is using (${KotlinVersion.CURRENT}).")
+        }
+
+        when (val metadata = KotlinClassMetadata.read(header)) {
             is KotlinClassMetadata.Class -> {
                 val klass = metadata.toKmClass()
                 val writer = KotlinClassMetadata.Class.Writer()
                 klass.accept(RemappingKmVisitors(remapper).RemappingKmClassVisitor(writer))
-                writeClassHeader(writer.write().header)
+                val remapped = writer.write(header.metadataVersion, header.extraInt).header
+                writeClassHeader(remapped)
+                validateKotlinClassHeader(remapped, header)
             }
             is KotlinClassMetadata.SyntheticClass -> {
                 val klambda = metadata.toKmLambda()
@@ -56,14 +71,29 @@ class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapp
                 if (klambda != null) {
                     val writer = KotlinClassMetadata.SyntheticClass.Writer()
                     klambda.accept(RemappingKmVisitors(remapper).RemappingKmLambdaVisitor(writer))
-                    writeClassHeader(writer.write().header)
+                    val remapped = writer.write(header.metadataVersion, header.extraInt).header
+                    writeClassHeader(remapped)
+                    validateKotlinClassHeader(remapped, header)
                 } else {
                     accept(next)
                 }
             }
-            // Can only be turned into KmPackage which is useless data
-            is KotlinClassMetadata.FileFacade, is KotlinClassMetadata.MultiFileClassPart,
-            // Can't be turned into data
+            is KotlinClassMetadata.FileFacade -> {
+                val kpackage = metadata.toKmPackage()
+                val writer = KotlinClassMetadata.FileFacade.Writer()
+                kpackage.accept(RemappingKmVisitors(remapper).RemappingKmPackageVisitor(writer))
+                val remapped = writer.write(header.metadataVersion, header.extraInt).header
+                writeClassHeader(remapped)
+                validateKotlinClassHeader(remapped, header)
+            }
+            is KotlinClassMetadata.MultiFileClassPart -> {
+                val kpackage = metadata.toKmPackage()
+                val writer = KotlinClassMetadata.MultiFileClassPart.Writer()
+                kpackage.accept(RemappingKmVisitors(remapper).RemappingKmPackageVisitor(writer))
+                val remapped = writer.write(metadata.facadeClassName, metadata.header.metadataVersion, metadata.header.extraInt).header
+                writeClassHeader(remapped)
+                validateKotlinClassHeader(remapped, header)
+            }
             is KotlinClassMetadata.MultiFileClassFacade, is KotlinClassMetadata.Unknown, null -> {
                 // do nothing
                 accept(next)
@@ -72,7 +102,7 @@ class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapp
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun readMetadata(): KotlinClassMetadata? {
+    private fun readHeader(): KotlinClassHeader? {
         var kind: Int? = null
         var metadataVersion: IntArray? = null
         var data1: Array<String>? = null
@@ -97,8 +127,7 @@ class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapp
             }
         }
 
-        val header = KotlinClassHeader(kind, metadataVersion, data1, data2, extraString, packageName, extraInt)
-        return KotlinClassMetadata.read(header)
+        return KotlinClassHeader(kind, metadataVersion, data1, data2, extraString, packageName, extraInt)
     }
 
     private fun writeClassHeader(header: KotlinClassHeader) {
@@ -120,5 +149,12 @@ class KotlinClassMetadataRemappingAnnotationVisitor(private val remapper: Remapp
         }
 
         newNode.accept(next)
+    }
+
+    private fun validateKotlinClassHeader(remapped: KotlinClassHeader, original: KotlinClassHeader) {
+        // This can happen when the remapper is ran on a kotlin version that does not match the version the class was compiled with.
+        if (remapped.data2.size != original.data2.size) {
+            logger.info("Kotlin class metadata size mismatch: data2 size does not match original in class $className. New: ${remapped.data2.size} Old: ${original.data2.size}")
+        }
     }
 }

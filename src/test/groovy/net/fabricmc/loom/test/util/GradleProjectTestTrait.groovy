@@ -1,7 +1,7 @@
 /*
  * This file is part of fabric-loom, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2021 FabricMC
+ * Copyright (c) 2021-2022 FabricMC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,11 @@ trait GradleProjectTestTrait {
         File gradleHomeDir = options.gradleHomeDir as File ?: options.sharedFiles ? sharedGradleHomeDir : File.createTempDir()
 
         setupProject(options, projectDir)
+
+        println([
+            projectDir: projectDir.absolutePath,
+            gradleHomeDir: gradleHomeDir.absolutePath
+        ])
 
         return new GradleProject(
                 gradleVersion: gradleVersion,
@@ -232,6 +237,10 @@ trait GradleProjectTestTrait {
 
         File getGeneratedSources(String mappings) {
             return new File(getGradleHomeDir(), "caches/fabric-loom/${mappings}/minecraft-merged-named-sources.jar")
+        }
+
+        File getGeneratedLocalSources(String mappings) {
+            return new File(getProjectDir(), ".gradle/loom-cache/${mappings}/minecraft-project-@-merged-named-sources.jar")
         }
 
         void buildSrc(String name) {

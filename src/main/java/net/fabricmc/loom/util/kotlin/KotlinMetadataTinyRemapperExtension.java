@@ -22,18 +22,9 @@
  * SOFTWARE.
  */
 
-package net.fabricmc.loom.kotlin.remapping
+package net.fabricmc.loom.util.kotlin;
 
-import net.fabricmc.tinyremapper.TinyRemapper
-import net.fabricmc.tinyremapper.api.TrClass
-import org.objectweb.asm.ClassVisitor
+import net.fabricmc.tinyremapper.TinyRemapper;
 
-object KotlinMetadataTinyRemapperExtension : TinyRemapper.ApplyVisitorProvider, TinyRemapper.Extension {
-    override fun insertApplyVisitor(cls: TrClass, next: ClassVisitor): ClassVisitor {
-        return KotlinMetadataRemappingClassVisitor(cls.environment.remapper, next)
-    }
-
-    override fun attach(builder: TinyRemapper.Builder) {
-        builder.extraPreApplyVisitor(this)
-    }
+public interface KotlinMetadataTinyRemapperExtension extends TinyRemapper.ApplyVisitorProvider, TinyRemapper.Extension {
 }
