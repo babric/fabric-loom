@@ -67,8 +67,7 @@ public record MinecraftVersionMeta(
 		}
 	}
 
-	public record Library(Downloads downloads, String name, String url, Map<String, String> natives, List<Rule> rules,
-						  Object extract) {
+	public record Library(Downloads downloads, String name, String url, Map<String, String> natives, List<Rule> rules, Object extract) {
 		public Library(Downloads downloads, String name, String url, Map<String, String> natives, List<Rule> rules, Object extract) {
 			this.name = name;
 			this.url = url;
