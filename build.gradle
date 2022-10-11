@@ -10,6 +10,7 @@ plugins {
 	id 'codenarc'
 	id "org.jetbrains.kotlin.jvm" version "1.6.10" // Must match the version included with gradle.
 	id "com.diffplug.spotless" version "6.8.0"
+	id "org.gradle.test-retry" version "1.4.1"
 }
 
 java {
@@ -81,7 +82,6 @@ dependencies {
 	implementation ('org.ow2.asm:asm-commons:9.3')
 	implementation ('org.ow2.asm:asm-tree:9.3')
 	implementation ('org.ow2.asm:asm-util:9.3')
-	implementation ('com.github.mizosoft.methanol:methanol:1.7.0')
 
 	// game handling utils
 	implementation ('net.fabricmc:stitch:0.6.2') {
@@ -202,6 +202,13 @@ test {
 	// Forward system prop onto tests.
 	if (System.getProperty("fabric.loom.test.homeDir")) {
 		systemProperty "fabric.loom.test.homeDir", System.getProperty("fabric.loom.test.homeDir")
+	}
+
+
+	if (ENV.CI) {
+		retry {
+			maxRetries = 3
+		}
 	}
 }
 
@@ -325,5 +332,23 @@ task downloadGradleSources() {
 
 		println("Downloading (${url}) to (${gradleApiSources})")
 		gradleApiSources << new URL(url).newInputStream()
+	}
+}
+
+task printActionsTestName(type: PrintActionsTestName) {
+}
+
+/**
+ * Replaces invalid characters in test names for GitHub Actions artifacts.
+ */
+class PrintActionsTestName extends DefaultTask {
+	@Input
+	@Option(option = "name", description = "The test name")
+	String testName
+
+	@TaskAction
+	def run() {
+		def sanitised = testName.replace('*', '_')
+		println "::set-output name=test::$sanitised"
 	}
 }
