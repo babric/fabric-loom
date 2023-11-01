@@ -5,11 +5,11 @@ commons-io = "2.15.1"
 gson = "2.10.1"
 guava = "33.0.0-jre"
 
-stitch = "0.6.2"
+stitch = "0.6.2-babric.1"
 tiny-remapper = "0.10.0"
 access-widener = "2.1.0"
 mapping-io = "0.5.1"
-lorenz-tiny = "4.0.2"
+lorenz-tiny = "4.0.2-babric.2"
 mercury = "0.4.1"
 kotlinx-metadata = "0.8.0"
 
@@ -32,11 +32,11 @@ commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
-fabric-stitch = { module = "net.fabricmc:stitch", version.ref = "stitch" }
+fabric-stitch = { module = "babric:stitch", version.ref = "stitch" }
 fabric-tiny-remapper = { module = "net.fabricmc:tiny-remapper", version.ref = "tiny-remapper" }
 fabric-access-widener = { module = "net.fabricmc:access-widener", version.ref = "access-widener" }
 fabric-mapping-io = { module = "net.fabricmc:mapping-io", version.ref = "mapping-io" }
-fabric-lorenz-tiny = { module = "net.fabricmc:lorenz-tiny", version.ref = "lorenz-tiny" }
+fabric-lorenz-tiny = { module = "babric:lorenz-tiny", version.ref = "lorenz-tiny" }
 fabric-mercury = { module = "net.fabricmc:mercury", version.ref = "mercury" }
 
 # Misc

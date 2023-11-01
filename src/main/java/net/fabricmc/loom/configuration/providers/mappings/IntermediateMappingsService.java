@@ -44,8 +44,8 @@ import net.fabricmc.loom.api.mappings.layered.MappingsNamespace;
 import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.util.service.SharedService;
 import net.fabricmc.loom.util.service.SharedServiceManager;
+import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.adapter.MappingNsCompleter;
-import net.fabricmc.mappingio.format.tiny.Tiny2FileReader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 public final class IntermediateMappingsService implements SharedService {
@@ -90,7 +90,7 @@ public final class IntermediateMappingsService implements SharedService {
 			MappingNsCompleter nsCompleter = new MappingNsCompleter(tree, Collections.singletonMap(MappingsNamespace.NAMED.toString(), MappingsNamespace.INTERMEDIARY.toString()), true);
 
 			try (BufferedReader reader = Files.newBufferedReader(getIntermediaryTiny(), StandardCharsets.UTF_8)) {
-				Tiny2FileReader.read(reader, nsCompleter);
+				MappingReader.read(reader, nsCompleter);
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to read intermediary mappings", e);

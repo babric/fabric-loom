@@ -35,6 +35,7 @@ import net.fabricmc.loom.configuration.providers.minecraft.MinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.SingleJarEnvType;
 import net.fabricmc.loom.configuration.providers.minecraft.SingleJarMinecraftProvider;
 import net.fabricmc.loom.configuration.providers.minecraft.SplitMinecraftProvider;
+import net.fabricmc.loom.configuration.providers.minecraft.GluedMinecraftProvider;
 import net.fabricmc.tinyremapper.TinyRemapper;
 
 public abstract class NamedMinecraftProvider<M extends MinecraftProvider> extends AbstractMappedMinecraftProvider<M> {
@@ -125,6 +126,24 @@ public abstract class NamedMinecraftProvider<M extends MinecraftProvider> extend
 		@Override
 		public SingleJarEnvType env() {
 			return env;
+		}
+	}
+
+	public static final class GluedImpl extends NamedMinecraftProvider<GluedMinecraftProvider> implements Merged {
+		public GluedImpl(Project project, GluedMinecraftProvider minecraftProvider) {
+			super(project, minecraftProvider);
+		}
+
+		@Override
+		public List<RemappedJars> getRemappedJars() {
+			return List.of(
+				new RemappedJars(minecraftProvider.getMergedJar(), getMergedJar(), MappingsNamespace.GLUE)
+			);
+		}
+
+		@Override
+		public List<MinecraftJar.Type> getDependencyTypes() {
+			return List.of(MinecraftJar.Type.MERGED);
 		}
 	}
 }
